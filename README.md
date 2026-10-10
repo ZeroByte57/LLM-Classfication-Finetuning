@@ -1,2 +1,2 @@
-# LLM-Classfication-Finetuning Chatbot Arena, Kaggle
+# LLM Classfication Finetuning, Chatbot Arena - Kaggle
 
