@@ -2,38 +2,45 @@
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import seaborn as sns
 
-train_data = pd.read_csv("Dataset/train.csv")
-print(train_data.info(),"\n")
-print(train_data.head(),"\n")
-print(train_data.describe(),"\n")
-
-
-'''
-Conditions & data patterns:
-    len of the response effects the user preference (more or less).
-    most winning model
-    impact of tie count models
-'''
-
-# input_features = train_data['model_a'],train_data['model_b'],train_data['response_a'],train_data['response_b']
-# target_labels = train_data['winner_model_a'],train_data['winner_model_b'],train_data['winner_tie']
-
-# input_features = pd.DataFrame(train_data[['model_a','model_b','response_a','response_b']])
-# target_labels = pd.DataFrame(train_data[['winner_model_a','winner_model_b','winner_tie']])
-
-input_fetures = id, prompt, response_a, response_b
-output = id, model_a_prob, model_b_prob, tie_prob
+data_train = pd.read_csv("Dataset/train.csv")
+print(data_train.info(),"\n")
 
 
-'''
-Plots:
-    for large responses between models
-    winning, loosing and tie models
-'''
 
-print(target_labels,input_features)
-# plt.plot(target_labels)
-# plt.plot(input_features)
+# Saving the plot of unique model distributions
+a = data_train.groupby('model_a').agg(  
+    win_count=('winner_model_a', 'sum'),
+    lose_count=('winner_model_b', 'sum'),
+    tie_count=('winner_tie', 'sum')
+)
+b = data_train.groupby('model_b').agg(
+    win_count=('winner_model_b', 'sum'),
+    lose_count=('winner_model_a', 'sum'),
+    tie_count=('winner_tie', 'sum')
+)
+
+plot_data = a.add(b).astype(int)
+plot_data.index.name = 'model'
+plot_data = plot_data.loc[
+    plot_data.sum(axis=1).sort_values(ascending=False).index
+]
+
+fig, ax = plt.subplots(figsize=(10, 20))
+sns.heatmap(
+    plot_data,
+    annot=True,
+    fmt=',d',
+    cmap='YlGnBu',
+    linewidths=0.5,
+    cbar_kws={'label': 'Count'},
+    ax=ax
+)
+
+ax.set_title('Unique Model Distributions')
+ax.set_xlabel('Outcome')
+ax.set_ylabel('Model')
+plt.tight_layout()
+plt.savefig("unique_model_distribution.png", dpi=300, bbox_inches="tight")
 plt.show()
-
